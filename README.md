@@ -1,46 +1,120 @@
-Features
-Add New Product: Add a new product with SKU, name, quantity, and brand.
-Update Existing Product: Update the name, quantity, or brand of an existing product.
-Fetch Product Data: Retrieve and display details of a product using its SKU.
-Delete Product: Permanently delete a product from the inventory using its SKU.
-Sort Products: Sort the products either by quantity or name, and display the sorted list.
-Usage
-Add a New Product
+# Product Management System
 
-Enter 1 when prompted.
-Input the SKU, name, quantity, and brand of the product.
-Update an Existing Product
+## Overview
 
-Enter 2 when prompted.
-Input the SKU of the product to be updated.
-Choose which field (name, quantity, brand) to update and provide the new value.
-Fetch Product Data
+This script provides a simple command-line interface for managing a product inventory stored in a CSV file. Users can add, update, delete, and view product information, as well as sort products by quantity or name. 
 
-Enter 4 when prompted.
-Input the SKU of the product you want to fetch.
-Delete a Product
+## Features
 
-Enter 5 when prompted.
-Input the SKU of the product to be deleted.
-Sort Products
+- **Add Product:** Allows users to add new products to the inventory.
+- **Update Product:** Enables updating existing product details such as name, quantity, and brand.
+- **Fetch Product:** Retrieves and displays information for a specific product based on its SKU.
+- **Delete Product:** Permanently removes a product from the inventory.
+- **Sort Products:** Sorts the product list by quantity or name, and displays the sorted list.
 
-Enter 6 when prompted.
-Choose to sort by quantity or name.
-Decide on ascending or descending order.
-Exit
+## Requirements
 
-Enter 0 to close the dialog box and terminate the script.
-Code Breakdown
-Initialization (__init__): Displays a menu and handles user choices in an infinite loop until 0 is entered.
+- Python 3.x
+- CSV file named `products.csv` in the same directory as the script (will be created if not present).
 
-Add Product (addproduct): Takes user input and appends the product details to products.csv.
+## How to Use
 
-Search Product (search): Searches for a product by SKU and returns its details if found.
+1. **Run the Script:**
+   ```bash
+   python product_management.py
+   ```
 
-Update Product (updateproduct): Updates the details of a product and rewrites the CSV file with the updated data.
+2. **Interactive Menu:**
+   - **Enter 1:** Add a new product
+   - **Enter 2:** Update an existing product
+   - **Enter 4:** Fetch product details
+   - **Enter 5:** Delete a product
+   - **Enter 6:** Sort and display products
+   - **Enter 0:** Exit the application
 
-Fetch Product Data (readproduct): Retrieves and displays the details of a product based on SKU.
+## Functions
 
-Delete Product (deleteproduct): Removes a product from the CSV file based on SKU.
+### `addproduct()`
+Prompts the user for product details (SKU, name, quantity, and brand) and appends this data to `products.csv`.
 
-Sort Products (sortproducts): Sorts the product list either by quantity or name, and displays the sorted list.
+### `search(sku)`
+Searches for a product by its SKU and returns the product details if found.
+
+### `updateproduct()`
+Allows the user to update product information based on SKU. Updates are saved back to `products.csv`.
+
+### `readproduct()`
+Fetches and displays product information for a specified SKU.
+
+### `deleteproduct()`
+Deletes a product from `products.csv` based on the given SKU.
+
+### `sortproducts()`
+Sorts the products either by quantity or name in ascending or descending order and displays the sorted list.
+
+## Error Handling
+
+- **File Operations:** Handles exceptions that may occur while reading from or writing to the CSV file.
+- **User Input:** Validates user input for choices and quantities to ensure correct operations.
+
+## Notes
+
+- Deleting a product is irreversible. Ensure that you want to permanently remove the product before proceeding.
+- If the CSV file does not exist, it will be created automatically when a new product is added.
+
+## Example
+
+Here's a typical session with the product management script:
+
+```
+Enter 1 to add data of new product
+Enter 2 to update an existing product's data
+Enter 4 to fetch data of a particular product
+Enter 5 to delete the data of a particular product (IRREVERSIBLE OPERATION)
+Enter 6 to display products sorted by quantity or name
+Enter 0 to close this dialog box
+```
+
+**Adding a Product:**
+```
+Enter 1
+Enter SKU: 123
+Enter name: Widget
+Enter Quantity: 10
+Enter Brand: Acme
+```
+
+**Updating a Product:**
+```
+Enter 2
+Enter the SKU of the product to update: 123
+Current data: ['123', 'Widget', 10, 'Acme']
+Enter 1 to update name
+Enter 2 to update quantity
+Enter 3 to update brand
+Enter your choice (1/2/3): 2
+Enter new quantity: 20
+```
+
+**Fetching a Product:**
+```
+Enter 4
+Enter the SKU of the product to fetch: 123
+Name: Widget, Quantity: 20, Brand: Acme
+```
+
+**Deleting a Product:**
+```
+Enter 5
+Enter the SKU of the product to delete: 123
+```
+
+**Sorting Products:**
+```
+Enter 6
+Enter 1 to sort by quantity
+Enter 2 to sort by name
+Enter your choice (1/2): 1
+Enter 1 for ascending or 2 for descending order:
+```
+
