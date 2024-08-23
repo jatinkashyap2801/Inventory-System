@@ -1,8 +1,14 @@
 import csv
+import sqlite3
 
 class Product:
+    count = 0
+    
     def __init__(self):
-        # infinite loop  for dialog box untill user enter 0 
+        Product.count += 1
+        self.conn = sqlite3.connect('products.db')
+        self.create_table()
+        
         while True:
             print("Enter 1 to add data of new product")
             print("Enter 2 to update an existing product's data")
@@ -25,6 +31,18 @@ class Product:
                 self.sortproducts()
             else:
                 print("Invalid choice. Please enter a valid option.")
+                
+        self.conn.close()
+
+    def create_table(self):
+        try:
+            self.conn.execute('''CREATE TABLE IF NOT EXISTS PRODUCTS
+                                (SKU TEXT PRIMARY KEY NOT NULL,
+                                NAME TEXT NOT NULL,
+                                QTY INT NOT NULL,
+                                BRAND TEXT NOT NULL);''')
+        except Exception as e:
+            print(f"Error creating table: {e}")
 
     def addproduct(self):
         sku = input("Enter SKU: ")
@@ -32,23 +50,40 @@ class Product:
         qty = int(input("Enter Quantity: "))
         brand = input("Enter Brand: ")
         prod = [sku, name, qty, brand]
-        # product is added 
+        
+      
         try:
             with open('products.csv', 'a', newline='') as f_object:
                 writer_object = csv.writer(f_object)
                 writer_object.writerow(prod)
         except Exception as e:
-            print(f"Error adding product: {e}")
-# search operation
+            print(f"Error adding product to CSV: {e}")
+     
+        try:
+            self.conn.execute("INSERT INTO PRODUCTS (SKU, NAME, QTY, BRAND) VALUES (?, ?, ?, ?)", prod)
+            self.conn.commit()
+            print("Product added successfully.")
+        except Exception as e:
+            print(f"Error adding product to SQLite: {e}")
+
     def search(self, sku):
+       
         try:
             with open('products.csv', mode='r') as file:
                 csvFile = csv.reader(file)
                 for lines in csvFile:
-                    if lines[0] == sku: #if sku is same then return that particular list 
+                    if lines[0] == sku:  # if SKU is the same then return that particular list
                         return lines
         except Exception as e:
-            print(f"Error searching for product: {e}")
+            print(f"Error searching for product in CSV: {e}")
+      
+        try:
+            cursor = self.conn.execute("SELECT SKU, NAME, QTY, BRAND FROM PRODUCTS WHERE SKU = ?", (sku,))
+            data = cursor.fetchone()
+            if data:
+                return list(data)
+        except Exception as e:
+            print(f"Error searching for product in SQLite: {e}")
         return None
 
     def updateproduct(self):
@@ -58,7 +93,7 @@ class Product:
         if data is None:
             print("Product not found.")
             return
-#update data
+        
         print(f"Current data: {data}")
         print("Enter 1 to update name")
         print("Enter 2 to update quantity")
@@ -81,7 +116,7 @@ class Product:
         else:
             print("Invalid choice.")
             return
-#remove that particular list and write all the remaning
+        
         newlist = []
         with open('products.csv', mode='r') as file:
             csvFile = csv.reader(file)
@@ -95,10 +130,18 @@ class Product:
             with open('products.csv', 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerows(newlist)
-            print("Product updated successfully.")
+            print("Product updated successfully in CSV.")
         except Exception as e:
-            print(f"Error updating product: {e}")
-#data read from file
+            print(f"Error updating product in CSV: {e}")
+        
+       
+        try:
+            self.conn.execute("UPDATE PRODUCTS SET NAME = ?, QTY = ?, BRAND = ? WHERE SKU = ?", (data[1], data[2], data[3], sku))
+            self.conn.commit()
+            print("Product updated successfully in SQLite.")
+        except Exception as e:
+            print(f"Error updating product in SQLite: {e}")
+
     def readproduct(self):
         sku = input("Enter the SKU of the product to fetch: ")
         data = self.search(sku)
@@ -114,7 +157,7 @@ class Product:
         if data is None:
             print("Product not found.")
             return
-# copying all the data to list and overwriting the data excluding that list which is to be deleted
+        
         newlist = []
         with open('products.csv', mode='r') as file:
             csvFile = csv.reader(file)
@@ -126,10 +169,18 @@ class Product:
             with open('products.csv', 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerows(newlist)
-            print("Product deleted successfully.")
+            print("Product deleted successfully from CSV.")
         except Exception as e:
-            print(f"Error deleting product: {e}")
-# sorting based on quantity or name
+            print(f"Error deleting product from CSV: {e}")
+        
+      
+        try:
+            self.conn.execute("DELETE FROM PRODUCTS WHERE SKU = ?", (sku,))
+            self.conn.commit()
+            print("Product deleted successfully from SQLite.")
+        except Exception as e:
+            print(f"Error deleting product from SQLite: {e}")
+
     def sortproducts(self):
         print("Enter 1 to sort by quantity")
         print("Enter 2 to sort by name")
@@ -154,10 +205,24 @@ class Product:
             if order_choice == 2:
                 data.reverse()
 
-            print("Sorted product list:")
+            print("Sorted product list (from CSV):")
             for row in data:
                 print(f"SKU: {row[0]}, Name: {row[1]}, Quantity: {row[2]}, Brand: {row[3]}")
-
         except Exception as e:
-            print(f"Error sorting products: {e}")
-c1=Product();
+            print(f"Error sorting products from CSV: {e}")
+        
+        try:
+            order = "ASC" if order_choice == 1 else "DESC"
+            if sort_choice == 1:
+                cursor = self.conn.execute(f"SELECT SKU, NAME, QTY, BRAND FROM PRODUCTS ORDER BY QTY {order}")
+            elif sort_choice == 2:
+                cursor = self.conn.execute(f"SELECT SKU, NAME, QTY, BRAND FROM PRODUCTS ORDER BY NAME {order}")
+            
+            print("Sorted product list (from SQLite):")
+            for row in cursor:
+                print(f"SKU: {row[0]}, Name: {row[1]}, Quantity: {row[2]}, Brand: {row[3]}")
+        except Exception as e:
+            print(f"Error sorting products from SQLite: {e}")
+
+c1 = Product()
+print("The number of products that you have is", Product.count)
